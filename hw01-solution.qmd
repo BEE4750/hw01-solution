@@ -115,7 +115,7 @@ Write a fixed version of the code.
 
 ```{julia}
 function fixed_class_average(grades)
-    average_grade = mean(grades)
+    average_grade = sum(grades) / length(grades)
     return average_grade
 end
 ```
