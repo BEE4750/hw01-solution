@@ -10,10 +10,16 @@ format:
         warning: true
         error: true
         code-annotation: below
+    pdf:
+        include-in-header: 
+           text: |
+            \usepackage{fvextra}
+            \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+            \DefineVerbatimEnvironment{OutputCode}{Verbatim}{breaklines,commandchars=\\\{\}}
 execute: 
     echo: true
 engine: julia
-format-links: [ipynb]
+format-links: [pdf, ipynb]
 ---
 
 ## Overview
@@ -38,7 +44,7 @@ using LaTeXStrings
 Random.seed!(1)
 ```
 
-## Problems (Total: 50 Points)
+## Problems (Total: 50/60 Points)
 
 ### Problem 1 (15 points)
 
@@ -226,13 +232,12 @@ display(p)
 These equations will be derived in terms of $X_1$ (the land disposal amount, in kg/day) and $X_2$ (the chemically treated amount, in kg/day), where $X_1 + X_2 \leq 100\ \mathrm{kg/day}$. Note that we don't need to explicitly represent the amount of directly disposed YUK, as this is $100 - X_1 - X_2$ and so is not a free variable.
 
 The amount of YUK which will be discharged is
-$$
+
 \begin{align*}
 D(X_1, X_2) &= 100 - X_1 - X_2 + 0.2 X_1 + 0.005X_2^2 \\
 &= 100 - 0.8 X_1 + (0.005X_2 - 1)X_2 \\
 &= 100 - 0.8 X_1 + 0.005 X_2^2 - X_2
 \end{align*}
-$$
 
 The cost is
 $$
@@ -291,4 +296,33 @@ yaxis!(p, "Treatment Cost (\$/day)") # <5>
 4. This is how to add a vertical line to a plot with a label. The syntax for a horizontal line is `hline(...)`. The `!` at the end of `vline!()` is important: this is standard Julia syntax to distinguish commands which *mutate* (or change) their input (in this case, the first argument `p`, the plot object), as this is not always desirable behavior.
 5. This is how to change axis labels. Notice that this also mutates the input plot.
 
-We can see that there are a few treatment strategies which comply with the limit, but they are fairly expensive. This is an example of a *tradeoff* between two objectives^[More on this later in the semester!], where one has to make a choice between what objectives to prioritize. But one thing to note is that just choosing an expensive strategy does not guarantee compliance
+We can see that there are a few treatment strategies which comply with the limit, but they are fairly expensive. This is an example of a *tradeoff* between two objectives^[More on this later in the semester!], where one has to make a choice between what objectives to prioritize. But one thing to note is that just choosing an expensive strategy does not guarantee compliance.
+
+### Problem 5 (10 points)
+
+#### Problem 5.1
+
+Here is one solution: Julia includes a function `iseven()` which returns 1 if the argument is even and 0 if it is odd. So we can use a comprehension to evaluate `!iseven(x)` (the `!` is Boolean negation) over the range `0:149`, which will return a vector of 1s and 0s, and then add up the vector to get the count of odd numbers. Another approach could be to use the `isodd()` function directly.
+
+```{julia}
+odd_count = sum([!iseven(x) for x in 0:149])
+```
+
+#### Problem 5.2
+
+```{julia}
+function polynomial(x, a)
+    p = 0 # initialize value of polynomial
+    for i in eachindex(a) # <1>
+        p += a[i] * x^(i-1) # <2>
+    end
+    return p
+end
+
+a = [1, 0, -1, 2]
+x = 2
+@show polynomial(x, a); # <3>
+```
+1. `for i in eachindex(a)` is the same thing as `for i = 1:length(a)` (iterating over the indices of `a`) but is preferred in Julia to provide more flexibility with how the array `a` is indexed, such as for multidimensional arrays. There is also `for b in a` which iterates over the values in `a` rather than the indices, and `for (i, b) in pairs(a)` which iterates over both the indices and values without requiring the line `b = a[i]`.
+2. Julia indexing starts at 1, so `i=1` corresponds to the constant term, or a power of 0.
+3. The `@show` macro formats the output of the command nicely and prints it; the semi-colon at the end suppresses the normal output of the notebook cell, which is printed by default without the semi-colon.
